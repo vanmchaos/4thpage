@@ -6,15 +6,16 @@
     <title>获取地理位置并生成天气日历</title>
     <style>
         body {
-            background-color: #CCE8CF;
+            background-color: #FFFFFF;  /* 将背景颜色改为纯白 */
             font-family: Arial, sans-serif;
         }
         h3 {
-            font-size: 25px;
+            font-size: 20px;
         }
         #showLocation {
-            height: 200px;
+            height: 0px;  /* 隐藏地理位置信息 */
             font-size: 20px;
+            visibility: hidden;  /* 完全隐藏内容 */
         }
         button {
             padding: 10px 20px;
@@ -24,8 +25,8 @@
 </head>
 <body>
 
-<h3>HTML5学习(地理位置定位)</h3>
-<div id="showLocation">您的地理位置信息如下：</div>
+<h3>天气日历</h3>
+<div id="showLocation">您的地理位置信息如下：</div> <!-- 经纬度将被隐藏 -->
 <div id="mapholder"></div>
 <button id="generateCalendar" onclick="generateICS()">生成天气日历</button>
 
@@ -46,7 +47,7 @@ if (navigator.geolocation) {
 function success(position) {
     latitude = position.coords.latitude;
     longitude = position.coords.longitude;
-    $("showLocation").innerHTML = `纬度: ${latitude}<br />经度: ${longitude}`;
+    $("showLocation").innerHTML = `纬度: ${latitude}<br />经度: ${longitude}`;  // 隐藏的div仍然被赋值
 }
 
 // 错误处理函数
