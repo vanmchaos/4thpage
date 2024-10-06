@@ -58,7 +58,8 @@ function error(err) {
 function generateICS() {
     if (latitude && longitude) {
         const apiKey = '1941b88a08d2424691ef89edae8ece0f';
-        const apiUrl = `https://devapi.qweather.com/v7/grid-weather/7d?location=${latitude},${longitude}&key=${apiKey}`;
+        // 使用经度和纬度请求天气数据时，注意顺序是经度在前，纬度在后
+        const apiUrl = `https://devapi.qweather.com/v7/grid-weather/7d?location=${longitude},${latitude}&key=${apiKey}`;
 
         fetch(apiUrl)
             .then(response => response.json())
