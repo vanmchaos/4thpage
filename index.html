@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>获取地理位置并生成天气日历</title>
+    <style>
+        body {
+            background-color: #CCE8CF;
+            font-family: Arial, sans-serif;
+        }
+        h3 {
+            font-size: 25px;
+        }
+        #showLocation {
+            height: 200px;
+            font-size: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+
+<h3>HTML5学习(地理位置定位)</h3>
+<div id="showLocation">您的地理位置信息如下：</div>
+<div id="mapholder"></div>
+<button id="generateCalendar" onclick="generateICS()">生成天气日历</button>
+
+<script type="text/javascript">
+function $(elementId) {
+    return document.getElementById(elementId);
+}
+
+// 获取用户地理位置
+let latitude, longitude;
+if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(success, error);
+} else {
+    alert("该浏览器不支持获取地理位置");
+}
+
+// 成功获取地理位置后的处理函数
+function success(position) {
+    latitude = position.coords.latitude;
+    longitude = position.coords.longitude;
+    $("showLocation").innerHTML = `纬度: ${latitude}<br />经度: ${longitude}`;
+}
+
+// 错误处理函数
+function error(err) {
+    alert("无法获取地理位置: " + err.message);
+}
+
+// 生成 ICS 日历文件并提供下载
+function generateICS() {
+    if (latitude && longitude) {
+        const apiKey = '1941b88a08d2424691ef89edae8ece0f';
+        const apiUrl = `https://devapi.qweather.com/v7/grid-weather/7d?location=${latitude},${longitude}&key=${apiKey}`;
+
+        fetch(apiUrl)
+            .then(response => response.json())
+            .then(weatherData => {
+                if (weatherData.daily) {
+                    let icsContent = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//YourApp//EN\n";
+                    
+                    weatherData.daily.forEach(day => {
+                        const date = day.fxDate;
+                        const startDate = new Date(date).toISOString().slice(0, 10).replace(/-/g, '');
+                        const endDate = new Date(new Date(date).getTime() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10).replace(/-/g, '');
+                        
+                        icsContent += "BEGIN:VEVENT\n";
+                        icsContent += `SUMMARY:天气: ${day.textDay}, 温度: ${day.tempMin}°C - ${day.tempMax}°C\n`;
+                        icsContent += `DESCRIPTION:风: ${day.windDirDay} ${day.windScaleDay}级, 湿度: ${day.humidity}%\n`;
+                        icsContent += `DTSTART:${startDate}\n`;
+                        icsContent += `DTEND:${endDate}\n`;
+                        icsContent += "END:VEVENT\n";
+                    });
+                    
+                    icsContent += "END:VCALENDAR";
+
+                    // 创建下载链接
+                    const blob = new Blob([icsContent], { type: 'text/calendar' });
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = 'weather_forecast.ics';
+                    link.click();
+                } else {
+                    alert("未获取到天气数据");
+                }
+            })
+            .catch(error => {
+                alert("生成日历失败: " + error.message);
+            });
+    } else {
+        alert("地理位置信息未获取到");
+    }
+}
+</script>
+</body>
+</html>
